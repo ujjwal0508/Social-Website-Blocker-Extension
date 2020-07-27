@@ -1,0 +1,20 @@
+{
+    "name": "Social Media Blocker",
+    "description": "Blocks listed social media applications after 15 minutes",
+    "version": "1.0",
+    "manifest_version": 2,
+    "background": {
+        "scripts": [
+            "background.js"
+        ],
+        "persistent": false
+    },
+    "permissions": [
+        "tabs",
+        "storage"
+    ],
+    "browser_action": {
+        "default_title": "My Dummy extension",
+        "default_popup": "popup.html"
+    }
+}

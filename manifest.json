@@ -14,7 +14,7 @@
         "storage"
     ],
     "browser_action": {
-        "default_title": "My Dummy extension",
+        "default_title": "Add website to block",
         "default_popup": "popup.html"
     }
 }

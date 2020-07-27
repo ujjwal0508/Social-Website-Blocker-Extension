@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
 async function foo() {
 
-    // await clearStorage();
+    await clearStorage();
     console.log("Starting task");
 
 
@@ -48,6 +48,7 @@ async function foo() {
                 let currentDate = new Date();
                 currentDate.setHours(0, 0, 0, 0);
 
+                await setBadgeText((50 - 1 - result.timeSpent) + '');
                 if (resultDate.getTime() === currentDate.getTime()) {
                     result.timeSpent++;
                     shouldBeBlocked(result, tab);
@@ -57,6 +58,8 @@ async function foo() {
                 }
                 await setDataInStorage(url, result);
 
+            } else {
+                await setBadgeText('');
             }
         }
 
@@ -65,6 +68,14 @@ async function foo() {
     })();
 
 
+}
+
+function setBadgeText(value) {
+    return new Promise((resolve, reject) => {
+        chrome.browserAction.setBadgeText({ text: value }, function () {
+            resolve();
+        })
+    })
 }
 
 function getCurrentDate() {
@@ -95,7 +106,7 @@ async function shouldBeBlocked(result, tab) {
     let currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
     if (resultDate.getTime() === currentDate.getTime()) {
-        if (result.timeSpent >= 5) {
+        if (result.timeSpent >= 50) {
             alert("Kaam krle loser");
             await closeTab(tab.id);
         }

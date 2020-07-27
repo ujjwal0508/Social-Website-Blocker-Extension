@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
         let dataObj = {
             date: getCurrentDate(),
-            timeSpend: 0
+            timeSpent: 0
         };
 
         await setDataInStorage(message.url, dataObj);
@@ -17,16 +17,9 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
 async function foo() {
 
-    await clearStorage();
+    // await clearStorage();
     console.log("Starting task");
 
-    let fbData = {
-        date: getCurrentDate(),
-        timeSpent: 0
-    }
-
-
-    chrome.storage.sync.set({ 'www.facebook.com': fbData }, function () { });
 
     allBlockingUrls = await getAllKeys();
 

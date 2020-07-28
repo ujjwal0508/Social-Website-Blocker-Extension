@@ -1,4 +1,5 @@
 let allBlockingUrls = [];
+const TIME_TO_BLOCK_IN_SECONDS = 10;
 
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
 
@@ -17,7 +18,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
 async function foo() {
 
-    await clearStorage();
+    await clearStorage();   
     console.log("Starting task");
 
 
@@ -48,7 +49,7 @@ async function foo() {
                 let currentDate = new Date();
                 currentDate.setHours(0, 0, 0, 0);
 
-                await setBadgeText((50 - 1 - result.timeSpent) + '');
+                await setBadgeText((TIME_TO_BLOCK_IN_SECONDS - 1 - result.timeSpent) + '');
                 if (resultDate.getTime() === currentDate.getTime()) {
                     result.timeSpent++;
                     shouldBeBlocked(result, tab);
@@ -106,7 +107,7 @@ async function shouldBeBlocked(result, tab) {
     let currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
     if (resultDate.getTime() === currentDate.getTime()) {
-        if (result.timeSpent >= 50) {
+        if (result.timeSpent >= TIME_TO_BLOCK_IN_SECONDS) {
             alert("Kaam krle loser");
             await closeTab(tab.id);
         }

@@ -18,7 +18,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
 async function foo() {
 
-    await clearStorage();   
+    await clearStorage();
     console.log("Starting task");
 
 
@@ -32,42 +32,46 @@ async function foo() {
 
         if (tab !== undefined) {
 
-            let url = getHostName(tab.url);
-            let urlIdx = allBlockingUrls.indexOf(url);
-            if (urlIdx !== -1) {
+            try {
+                let url = getHostName(tab.url);
+                let urlIdx = allBlockingUrls.indexOf(url);
+                // console.log(allBlockingUrls);
+                if (urlIdx !== -1) {
 
-                console.log('found a blocking url')
-                let url = allBlockingUrls[urlIdx];
+                    console.log('found a blocking url')
+                    let url = allBlockingUrls[urlIdx];
 
-                let result = await getDataFromStorage(url);
+                    let result = await getDataFromStorage(url);
 
-                shouldBeBlocked(result, tab);
-
-                let resultDate = Date.parse(result.date);
-                resultDate = new Date(resultDate);
-
-                let currentDate = new Date();
-                currentDate.setHours(0, 0, 0, 0);
-
-                await setBadgeText((TIME_TO_BLOCK_IN_SECONDS - 1 - result.timeSpent) + '');
-                if (resultDate.getTime() === currentDate.getTime()) {
-                    result.timeSpent++;
                     shouldBeBlocked(result, tab);
-                } else {
-                    result.date = getCurrentDate();
-                    result.timeSpent = 1;
-                }
-                await setDataInStorage(url, result);
 
-            } else {
-                await setBadgeText('');
+                    let resultDate = Date.parse(result.date);
+                    resultDate = new Date(resultDate);
+
+                    let currentDate = new Date();
+                    currentDate.setHours(0, 0, 0, 0);
+
+                    await setBadgeText((TIME_TO_BLOCK_IN_SECONDS - 1 - result.timeSpent)     + '');
+                    if (resultDate.getTime() === currentDate.getTime()) {
+                        result.timeSpent++;
+                        shouldBeBlocked(result, tab);
+                    } else {
+                        result.date = getCurrentDate();
+                        result.timeSpent = 1;
+                    }
+                    await setDataInStorage(url, result);
+
+                } else {
+                    await setBadgeText('');
+                }
+            } catch (err) {
+                console.log(err);
             }
         }
 
         setTimeout(pollForCurrentTab, 1000);
 
     })();
-
 
 }
 
@@ -96,6 +100,10 @@ function getAllKeys() {
 }
 
 function getHostName(url) {
+
+    if (url === undefined)
+        throw 'url is undefined';
+
     var hostname = (new URL(url)).hostname;
     return hostname;
 }
@@ -108,17 +116,36 @@ async function shouldBeBlocked(result, tab) {
     currentDate.setHours(0, 0, 0, 0);
     if (resultDate.getTime() === currentDate.getTime()) {
         if (result.timeSpent >= TIME_TO_BLOCK_IN_SECONDS) {
+            console.log('code yha alert pe aaya')
             alert("Kaam krle loser");
-            await closeTab(tab.id);
+
+            try {
+                await closeTab(tab.id);
+            } catch (err) {
+                console.log(err);
+                console.log('tab not closed');
+            }
         }
     }
 }
 
 function closeTab(tabId) {
+
     return new Promise((resolve, reject) => {
-        chrome.tabs.remove(tabId, function () {
-            resolve();
-        });
+        chrome.tabs.get(tabId, function () {
+
+            if (chrome.runtime.lastError) {
+                console.log(chrome.runtime.lastError.message);
+                reject(chrome.runtime.lastError.message);
+            } else {
+                // Tab exists
+                chrome.tabs.remove(tabId, function () {
+                    resolve();
+                });
+            }
+        })
+
+
     })
 }
 
@@ -152,7 +179,7 @@ function getCurrentTab() {
             })
     })
 }
-
+// testing ke liye kre hai 
 function clearStorage() {
     return new Promise((resolve, reject) => {
 

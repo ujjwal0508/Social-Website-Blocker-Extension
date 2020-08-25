@@ -16,9 +16,14 @@ async function foo() {
             let message = {
                 url: urlToBlock
             }
-            await sendMessageToBackGround(message);
-            allUrlToList(urlToBlock);
 
+            try {
+                await sendMessageToBackGround(message);
+            } catch (err) {
+                console.log(err);
+            }
+
+            allUrlToList(urlToBlock);
             document.getElementById('url').value = '';
         }
     }
@@ -32,8 +37,13 @@ async function foo() {
 
     function sendMessageToBackGround(message) {
         return new Promise((resolve, reject) => {
+
             chrome.runtime.sendMessage(message, function () {
-                resolve();
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError.message);
+                } else {
+                    resolve();
+                }
             });
 
         })
